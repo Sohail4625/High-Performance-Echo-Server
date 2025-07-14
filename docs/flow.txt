@@ -1,0 +1,6 @@
+1. First create a simple echo server for a single client
+2. Make it usable for multiple clients
+3. Optimize it 
+4. (Optional) Try to containerize it
+5. Test
+6. Use new branch for each feature and then merge with the main branch
