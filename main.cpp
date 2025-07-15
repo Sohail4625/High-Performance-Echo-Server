@@ -18,25 +18,30 @@ using namespace std;
 #define PORT 8080
 
 ofstream log_file;
+string cached_timestamp;
+time_t last_time = 0;
 void log(int type, const string& message) {
     time_t now = time(nullptr);
-    tm* now_tm = localtime(&now);
+    if (now != last_time) {
+        tm* now_tm = localtime(&now);
+        cached_timestamp = to_string(now_tm->tm_year + 1900) + "-"
+                         + to_string(now_tm->tm_mon + 1) + "-"
+                         + to_string(now_tm->tm_mday) + " "
+                         + to_string(now_tm->tm_hour) + ":"
+                         + to_string(now_tm->tm_min) + ":"
+                         + to_string(now_tm->tm_sec);
+        last_time = now;
+    }
 
-    string timestamp = to_string(now_tm->tm_year + 1900) + "-"  
-                       + to_string(now_tm->tm_mon + 1) + "-"      
-                       + to_string(now_tm->tm_mday) + " "           
-                       + to_string(now_tm->tm_hour) + ":"           
-                       + to_string(now_tm->tm_min) + ":"            
-                       + to_string(now_tm->tm_sec);
-
+    
     if (type == 1) {
         if (log_file.is_open()) {
-            log_file << timestamp << " " << message << "\n";
+            log_file << cached_timestamp << " " << message << "\n";
             log_file.flush();
         }
     } else {
         if (log_file.is_open()) {
-            log_file << timestamp << " [ERROR] " << message << "\n";
+            log_file << cached_timestamp << " [ERROR] " << message << "\n";
             log_file.flush();
         }
     }
@@ -156,12 +161,11 @@ int main() {
                         epoll_ctl(epoll_fd, EPOLL_CTL_DEL, current_fd, nullptr);
                         close(current_fd);
                     }
-                    log(1, "Sent and received " + to_string(bytes_sent) + " bytes");
+                    // log(1, "Sent and received " + to_string(bytes_sent) + " bytes");
                 }
             }
         }
     }
-
     close(server_fd);
     close(epoll_fd);
     return 0;
